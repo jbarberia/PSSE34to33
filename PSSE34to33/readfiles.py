@@ -35,10 +35,10 @@ def read_case(filename):
                     for j, sublist in enumerate(DATA[key]):
                         parts = get_parts(line, sublist)
                         components.append(parts)
-                        if j < 4 and components[0]["K"] != 0:
+                        if j < 3:
                             line = next(f)
-                        else:
-                            line = ""
+                        elif j == 3:
+                            line = next(f) if components[0]["K"] != '0' else ""
                     # Append to case
                     case34[key].append(components)
                 else:
