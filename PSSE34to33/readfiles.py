@@ -51,15 +51,15 @@ def read_case(filename):
     return case34
 
 def get_type_of_data(line):
-    match_end = re.search("^Q", line)
+    match_end = re.search(r"^Q", line)
     if match_end:
         return "END"
 
-    match_comment = re.search("^@!", line)
+    match_comment = re.search(r"^@!", line)
     if match_comment:
         return "COMMENT"
 
-    match_data_type = re.search("(?<=BEGIN\s).*(?=\sDATA)", line)
+    match_data_type = re.search(r"(?<=BEGIN\s).*(?=\sDATA)", line)
     if match_data_type:
         return match_data_type.group()
 

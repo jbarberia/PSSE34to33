@@ -1,6 +1,8 @@
-import PSSE34to33
+import pytest
+from data import cases
+from PSSE34to33 import conversion_to_33
 
-# TESTS
-filename = "C:\\Users\\Barberia Juan Luis\\Desktop\\PSSE34to33\\tests\\data\\case.raw"
-case34 = PSSE34to33.read_case(filename)
-print(case34)
+@pytest.mark.parametrize('filename', cases)
+def test_00(filename):
+    conversion_to_33(filename)
+
