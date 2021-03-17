@@ -3,3 +3,13 @@
 
 # Virtual Enviroments
 venv
+
+# Building
+build/
+dist/
+
+# Eggs
+*.egg-info/
+
+# Cache
+__pycache__

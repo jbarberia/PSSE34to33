@@ -1,6 +1,6 @@
 import grg_pssedata as pd
 import re
-from dataformat import DATA, MULTILINECOMPONENTS
+from .dataformat import DATA, MULTILINECOMPONENTS
 
 def read_case(filename):
     case34 = {key: [] for key in DATA.keys()}
