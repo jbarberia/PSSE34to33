@@ -284,8 +284,70 @@ def conversion_to_33(filename):
             )
         )
 
-
+    # Two Terminal DC Lines
+    # TODO check the numbers of transformers make a test for that
     tt_dc_lines=[]
+    for idx, tt_dc in enumerate(case34["TWO-TERMINAL DC"]):
+        # General Data
+        l1 = _filter(tt_dc[0])
+        p = pd.struct.TwoTerminalDCLineParameters(
+            name=l1["NAME"],
+            mdc=l1["MDC"],
+            rdc=l1["RDC"],
+            setvl=l1["SETVL"],
+            vschd=l1["VSCHD"],
+            vcmod=l1["VCMOD"],
+            rcomp=l1["RCOMP"],
+            delti=l1["DELTI"],
+            meter=l1["METER"],
+            dcvmin=l1["DCVMIN"],
+            cccitmx=l1["CCCITMX"],
+            cccacc=l1["CCCACC"]
+        )
+        # Rectifier
+        l2 = _filter(tt_dc[1])
+        rec = pd.struct.TwoTerminalDCLineRectifier(
+            ipr=l2["IPR"],
+            nbr=l2["NBR"],
+            anmxr=l2["ANMXR"],
+            anmnr=l2["ANMNR"],
+            rcr=l2["RCR"],
+            xcr=l2["XCR"],
+            ebasr=l2["EBASR"],
+            trr=l2["TRR"],
+            tapr=l2["TAPR"],
+            tmxr=l2["TMXR"],
+            tmnr=l2["TMNR"],
+            stpr=l2["STPR"],
+            icr=l2["ICR"],
+            ifr=l2["IFR"],
+            itr=l2["ITR"],
+            idr=l2["IDR"],
+            xcapr=l2["XCAPR"]
+        )
+        # Inverter
+        l3 = _filter(tt_dc[2])
+        inv = pd.struct.TwoTerminalDCLineInverter(
+            ipi=l3["IPI"],
+            nbi=l3["NBI"],
+            anmxi=l3["ANMXI"],
+            anmni=l3["ANMNI"],
+            rci=l3["RCI"],
+            xci=l3["XCI"],
+            ebasi=l3["EBASI"],
+            tri=l3["TRI"],
+            tapi=l3["TAPI"],
+            tmxi=l3["TMXI"],
+            tmni=l3["TMNI"],
+            stpi=l3["STPI"],
+            ici=l3["ICI"],
+            ifi=l3["IFI"],
+            iti=l3["ITI"],
+            idi=l3["IDI"],
+            xcapi=l3["XCAPI"]
+        )
+        tt_dc_lines.append(pd.struct.TwoTerminalDCLine(idx, p, rec, inv))
+
     vsc_dc_lines=[]
     transformer_corrections=[]
     mt_dc_lines=[]
