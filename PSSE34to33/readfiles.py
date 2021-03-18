@@ -1,6 +1,6 @@
 import grg_pssedata as pd
 import re
-from .dataformat import DATA, MULTILINECOMPONENTS
+from .dataformat import DATA, HEADERKEYS,MULTILINECOMPONENTS
 
 def read_case(filename):
     case34 = {key: [] for key in DATA.keys()}
@@ -16,6 +16,11 @@ def read_case(filename):
 
             if type_data == "COMMENT":
                 continue # Skip comment
+
+            if type_data == "HEADER":
+                parts = get_parts(line.split("/")[0], HEADERKEYS)
+                case34["HEADER"] = parts
+                continue
 
             if type_data: # Header of block data
                 key = type_data
@@ -42,10 +47,12 @@ def read_case(filename):
                     # Append to case
                     case34[key].append(components)
                 else:
+                    components = []
                     for j, sublist in enumerate(DATA[key]):
                         parts = get_parts(line, sublist)
                         components.append(parts)
-                        line = next(f)
+                        if j < len(DATA[key]) - 1:
+                            line = next(f)
                     # Append to case
                     case34[key].append(components)
     return case34
@@ -58,6 +65,10 @@ def get_type_of_data(line):
     match_comment = re.search(r"^@!", line)
     if match_comment:
         return "COMMENT"
+    
+    match_header = re.search(f"^0([^,]*,)([^,]*,)\s*34", line)
+    if match_header:
+        return "HEADER"
 
     match_data_type = re.search(r"(?<=BEGIN\s).*(?=\sDATA)", line)
     if match_data_type:

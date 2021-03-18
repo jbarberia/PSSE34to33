@@ -1,5 +1,5 @@
 # Mapping PSSE 34 components
-
+HEADERKEYS = ["IC", "SBASE", "REV", "XFRRAT", "NXFRAT", "BASFRQ"]
 BUSKEYS = ["I", "NAME", "BASKV", "IDE", "AREA", "ZONE", "OWNER", "VM", "VA", "NVHI", "NVLO", "EVHI", "EVLO"]
 LOADKEYS = ["I", "ID", "STAT", "AREA", "ZONE", "PL", "QL", "IP", "IQ", "YP", "YQ", "OWNER", "SCALE", "INTRPT", "DGENP", "DGENQ", "DGENF"]
 FIXEDSHUNTKEYS = ["I", "ID", "STATUS", "GL", "BL"]

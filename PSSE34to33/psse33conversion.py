@@ -7,7 +7,15 @@ def _filter(dictionary: dict):
 
 def conversion_to_33(filename):
     case34 = read_case(filename)
-
+    # Header
+    ic=case34["HEADER"]["IC"]
+    sbase=case34["HEADER"]["SBASE"]
+    rev=33
+    xfrrat=case34["HEADER"]["XFRRAT"]
+    nxfrat=case34["HEADER"]["NXFRAT"]
+    basfrq=case34["HEADER"]["BASFRQ"]
+    reacord1=""
+    record2=""
     # Buses
     buses = []
     for idx, bus in enumerate(case34["BUS"]):
@@ -28,7 +36,6 @@ def conversion_to_33(filename):
                 evlo=bus["EVLO"]
             )
         ) 
-
     # Loads
     loads = []
     for idx, load in enumerate(case34["LOAD"]):
@@ -140,11 +147,10 @@ def conversion_to_33(filename):
         )
         warnings.warn("BRANCHES: Lose severals ratings RATE4...RATE12 data")
         warnings.warn("SWITCHES: Converted to zero impedance branch")
-
     # Transformers
     transformers=[]
     for idx, transformer in enumerate(case34["TRANSFORMER"]):
-        three_winding = transformer[0]["CKT"] == '0'
+        three_winding = transformer[0]["K"].replace('\'', '').strip() != '0'
         # First Line
         p1 = _filter(transformer[0])
         pfl = pd.struct.TransformerParametersFirstLine(
@@ -158,7 +164,7 @@ def conversion_to_33(filename):
             mag1=p1["MAG1"],
             mag2=p1["MAG2"],
             nmetr=p1["NMETR"],
-            name=["NAME"],
+            name=p1["NAME"],
             stat=p1["STAT"],
             o1=p1.get("O1", 0),
             f1=p1.get("F1", 0),
@@ -267,9 +273,9 @@ def conversion_to_33(filename):
                 cnxa=l3["CNXA3"]
             )
         if three_winding:
-            transformer.append(pd.struct.ThreeWindingTransformer(idx, p1, p2, w1, w2, w3))
+            transformers.append(pd.struct.ThreeWindingTransformer(idx, pfl, psl, w1, w2, w3))
         else:
-            transformer.append(pd.struct.TwoWindingTransformer(idx, p1, p2, w1, w2))
+            transformers.append(pd.struct.TwoWindingTransformer(idx, pfl, psl, w1, w2))
 
     # Areas
     areas=[]
@@ -285,7 +291,6 @@ def conversion_to_33(filename):
         )
 
     # Two Terminal DC Lines
-    # TODO check the numbers of transformers make a test for that
     tt_dc_lines=[]
     for idx, tt_dc in enumerate(case34["TWO-TERMINAL DC"]):
         # General Data
@@ -347,34 +352,119 @@ def conversion_to_33(filename):
             xcapi=l3["XCAPI"]
         )
         tt_dc_lines.append(pd.struct.TwoTerminalDCLine(idx, p, rec, inv))
-
+    # VSC DC Lines
     vsc_dc_lines=[]
+    for idx, vsc in enumerate(case34["VSC DC LINE"]):
+        # Rectifier
+        l1 = _filter(vsc[0])
+        p = pd.struct.VSCDCLineParameters(
+            name=["NAME"],
+            mdc=l1["MDC"],
+            rdc=l1["RDC"],
+            o1=l1["O1"],
+            f1=l1["F1"],
+            o2=l1["O2"],
+            f2=l1["F2"],
+            o3=l1["O3"],
+            f3=l1["F3"],
+            o4=l1["O4"],
+            f4=l1["F4"]
+        )
+        # Converters
+        c = []
+        for i in range(2):
+            l2 = _filter(vsc[i+1])
+            c.append(
+                pd.struct.VSCDCLineConverter(
+                    ibus=c["IBUS"],
+                    type=c["TYPE"],
+                    mode=c["MODE"],
+                    dcset=c["DCSET"],
+                    acset=c["ACSET"],
+                    aloss=c["ALOSS"],
+                    bloss=c["BLOSS"],
+                    minloss=c["MINLOSS"],
+                    smax=c["SMAX"],
+                    imax=c["IMAX"],
+                    pwf=c["PWF"],
+                    maxq=c["MAXQ"],
+                    minq=c["MINQ"],
+                    remot=c["VSREG"],
+                    rmpct=c["RMPCT"]
+                )
+            )
+        vsc_dc_lines.append(pd.struct.VSCDCLine(idx, p, c[0], c[1]))
+    # Transformers corrections TODO 
     transformer_corrections=[]
+    # Multi Terminal DC TODO
     mt_dc_lines=[]
+    # Line Grouping (SKIP)
     line_groupings=[]
+    # Zones
     zones=[]
+    for idx, zone in enumerate(case34["ZONE"]):
+        zones.append(
+            pd.struct.Zone(
+                i=zone["I"],
+                zoname=zone["ZONAME"]
+            )
+        )
+    # Inter Area Transfer TODO
     transfers=[]
+    # Owners
     owners=[]
+    for idx, ow in enumerate(case34["OWNER"]):
+        owners.append(
+            pd.struct.Owner(
+                i=ow["I"],
+                owname=ow["OWNAME"]
+            )
+        )
+    # Facts TODO
     facts=[]
+    # Switched Shunts
     switched_shunts=[]
+    for idx, sw in enumerate(case34["SWITCHED SHUNT"]):
+        switched_shunts.append(
+            pd.struct.SwitchedShunt(
+                index=idx,
+                i=sw["I"],
+                modsw=sw["MODSW"],
+                adjm=sw["ADJM"],
+                stat=sw["ST"],
+                vswhi=sw["VSWHI"],
+                vswlo=sw["VSWLO"],
+                swrem=sw["SWREG"],
+                rmpct=sw["RMPCT"],
+                rmidnt=sw["RMIDNT"],
+                binit=sw["BINIT"],
+                n1=sw["N1"],
+                b1=sw["B1"],
+                n2=sw["N2"],
+                b2=sw["B2"],
+                n3=sw["N3"],
+                b3=sw["B3"],
+                n4=sw["N4"],
+                b4=sw["B4"],
+                n5=sw["N5"],
+                b5=sw["B5"],
+                n6=sw["N6"],
+                b6=sw["B6"],
+                n7=sw["N7"],
+                b7=sw["B7"],
+                n8=sw["N8"],
+                b8=sw["B8"]
+            )
+        )
     gnes=[]
     induction_machine=[]
 
-    # TODO: add this
-    ic=0
-    sbase=100
-    rev=33
-    xfrrat=0
-    nxfrat=0
-    basfrq=50
-    reacord1=0
-    record2=0
 
 
     case33 = pd.struct.Case(
         ic, sbase, rev, xfrrat, nxfrat, basfrq, reacord1, record2,
-        buses, loads, fixed_shunts, generators, branches,
-        transformers, areas, tt_dc_lines, vsc_dc_lines, transformer_corrections, mt_dc_lines,
+        buses, loads, fixed_shunts, generators, branches, transformers, areas,
+        tt_dc_lines, vsc_dc_lines, transformer_corrections, mt_dc_lines,
         line_groupings, zones, transfers, owners, facts, switched_shunts,
         gnes, induction_machine
     )
