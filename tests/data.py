@@ -1,8 +1,9 @@
 import os
+from os.path import dirname, join, realpath, splitext
 
-data_path = os.path.dirname(os.path.realpath(__file__)) + '\\data'
+data_path = join(dirname(realpath(__file__)), 'data')
 cases = []
 for filename in os.listdir(data_path):
-    name, ext = os.path.splitext(filename)
+    name, ext = splitext(filename)
     if ext.lower() == '.raw':
-        cases.append(data_path + '\\' + filename)
+        cases.append(join(data_path, filename))

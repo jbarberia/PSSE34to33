@@ -1,4 +1,3 @@
-import grg_pssedata as pd
 import re
 from .dataformat import DATA, HEADERKEYS,MULTILINECOMPONENTS
 
@@ -6,7 +5,7 @@ def read_case(filename):
     case34 = {key: [] for key in DATA.keys()}
     key = None
 
-    with open(filename) as f:
+    with open(filename, encoding="latin-1") as f:
         for line in f:
 
             # Get type of data
